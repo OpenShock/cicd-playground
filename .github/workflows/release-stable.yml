@@ -1,0 +1,36 @@
+name: Release Stable
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release Stable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run release tool
+        id: release
+        uses: openshock/release-tool@v0.0.1-alpha
+        with:
+          mode: stable
+
+      - name: Push tag
+        if: steps.release.outputs.skip != 'true'
+        run: git push origin ${{ steps.release.outputs.tag }}
+
+      - name: Create GitHub release
+        if: steps.release.outputs.skip != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          prerelease: ${{ steps.release.outputs.prerelease }}
+          files: release.json

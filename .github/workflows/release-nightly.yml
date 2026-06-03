@@ -1,0 +1,40 @@
+name: Release Nightly
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release Nightly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Preview next release
+        uses: openshock/release-tool@v0.0.1-alpha
+        with:
+          mode: rc
+          dry-run: 'true'
+
+      - name: Delete existing nightly release and tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete nightly --yes --cleanup-tag 2>/dev/null || true
+
+      - name: Create nightly release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create nightly \
+            --title "Nightly ($(date -u '+%Y-%m-%d'))" \
+            --notes "Automated nightly build from \`develop\` branch. Commit: ${{ github.sha }}" \
+            --prerelease \
+            --target ${{ github.sha }}
