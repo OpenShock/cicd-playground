@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "version": "0.1.0",
+  "tag": "0.1.0-rc.1",
+  "prerelease": true,
+  "previous_version": null,
+  "released_at": "2026-06-03T12:53:10Z",
+  "commit": "0e46fa05a19d819650ebcc741b62061744438c04",
+  "headline": null,
+  "changes": [
+    {
+      "id": "added-change-file",
+      "type": "minor",
+      "breaking": false,
+      "categories": [],
+      "title": {
+        "format": "markdown",
+        "text": "Added change file"
+      },
+      "notices": []
+    },
+    {
+      "id": "testing-new-feature",
+      "type": "patch",
+      "breaking": false,
+      "categories": [
+        "stuff"
+      ],
+      "title": {
+        "format": "markdown",
+        "text": "Testing new feature"
+      },
+      "notices": []
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "tag_prefix": "",
+  "categories": [],
+  "branches": {
+    "master": { "release": "stable" }
+  }
+}

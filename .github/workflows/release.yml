@@ -1,0 +1,62 @@
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - '.changes/**'
+
+name: release
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.actor != 'github-actions[bot]'
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Rebase on top of latest remote
+        run: git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+
+      - name: Fetch all tags
+        run: git fetch --tags
+
+      - name: Run release tool
+        id: meta
+        uses: OpenShock/release-tool@v0.1.0-alpha.5
+        with:
+          mode: release
+          notes-output: release-notes.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push commit and tag
+        if: steps.meta.outputs.tag != ''
+        run: git push origin HEAD "${{ steps.meta.outputs.tag }}"
+
+      - name: Create GitHub release
+        if: steps.meta.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          PRERELEASE: ${{ steps.meta.outputs.prerelease }}
+        run: |
+          ARGS=("$TAG" release.json --title "$TAG" --notes-file release-notes.md)
+          [ "$PRERELEASE" = "true" ] && ARGS+=(--prerelease)
+          gh release create "${ARGS[@]}"
