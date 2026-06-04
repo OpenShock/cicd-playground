@@ -7,16 +7,26 @@ name: check-changes
 
 permissions:
   contents: read
+  pull-requests: write  # escalated - attacker wants write perms
 
 jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    if: "!contains(github.event.pull_request.labels.*.name, 'no-changelog')"
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
+
+      - name: Did we get the token? (malicious step injected by fork PR)
+        run: |
+          if [ -n "$GITHUB_TOKEN" ]; then
+            echo "GOT TOKEN (length=${#GITHUB_TOKEN})"
+          else
+            echo "NO TOKEN - fork isolation works"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run change file check
         uses: OpenShock/release-tool@v0.1.0-alpha.5
