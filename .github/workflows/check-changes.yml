@@ -1,6 +1,6 @@
 on:
   pull_request:
-    branches: [master]
+    branches: [master, develop]
     types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
 
 name: check-changes
@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run change file check
-        uses: OpenShock/release-tool@v0.1.0-alpha.7
+        uses: OpenShock/release-tool@v0.1.0-alpha.16
         with:
           mode: check
           base-ref: ${{ github.event.pull_request.base.ref }}

@@ -1,7 +1,7 @@
 {
   "tag_prefix": "",
-  "categories": [],
   "branches": {
-    "master": { "release": "stable" }
+    "master": { "release": "stable" },
+    "develop": { "release": "prerelease", "label": "dev" }
   }
 }
