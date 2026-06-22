@@ -39,7 +39,7 @@ jobs:
 
       - name: Run release tool
         id: meta
-        uses: OpenShock/release-tool@v0.1.0-alpha.16
+        uses: OpenShock/release-tool@v0.1.0-alpha.17
         with:
           mode: release
           notes-output: release-notes.md
