@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim # lightweight: release-tool + git/gh, no build
     timeout-minutes: 10
     if: github.actor != 'github-actions[bot]'
 
@@ -47,8 +47,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push commit and tag
-        if: steps.meta.outputs.tag != ''
-        run: git push origin HEAD "${{ steps.meta.outputs.tag }}"
+        uses: OpenShock/actions/publish-tag@7e9cf5cd05af3d97a363d80adad50cfe50a273d0 # v1.0.0
+        with:
+          tag: ${{ steps.meta.outputs.tag }}
 
       - name: Create GitHub release
         if: steps.meta.outputs.tag != ''
