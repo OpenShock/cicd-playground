@@ -21,7 +21,7 @@ jobs:
     if: github.actor != 'github-actions[bot]'
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -39,7 +39,7 @@ jobs:
 
       - name: Run release tool
         id: meta
-        uses: OpenShock/release-tool@v0.1.0
+        uses: OpenShock/release-tool@f3e8ebc530022e209e4d6a9a9c8bdb30b643253f # v0.3.0
         with:
           mode: release
           notes-output: release-notes.md
